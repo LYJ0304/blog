@@ -1,0 +1,123 @@
+---
+const options = [
+	{ value: 'light', label: '라이트' },
+	{ value: 'dark', label: '다크' },
+	{ value: 'system', label: '시스템' },
+];
+---
+
+<fieldset class="theme-select" hidden>
+	<legend class="visually-hidden">화면 테마</legend>
+	{options.map(({ value, label }) => (
+		<label title={label}>
+			<input class="visually-hidden" type="radio" name="blog-theme" value={value} checked={value === 'system'} />
+			<span class="theme-button">
+				<span class:list={['theme-icon', value]} aria-hidden="true">{value === 'light' && '☼'}</span>
+				<span class="visually-hidden">{label}</span>
+			</span>
+		</label>
+	))}
+</fieldset>
+
+<script>
+	const control = document.querySelector<HTMLFieldSetElement>('.theme-select');
+	const theme = document.documentElement.dataset;
+
+	if (control) {
+		const syncSelection = () => {
+			for (const input of control.querySelectorAll<HTMLInputElement>('input')) {
+				input.checked = input.value === (theme.theme ?? 'system');
+			}
+		};
+
+		syncSelection();
+		window.addEventListener('pageshow', syncSelection);
+		control.hidden = false;
+
+		control.addEventListener('change', (event) => {
+			if (!(event.target instanceof HTMLInputElement)) return;
+			const { value } = event.target;
+
+			if (value === 'system') {
+				delete theme.theme;
+			} else {
+				theme.theme = value;
+			}
+
+			try {
+				if (value === 'system') {
+					localStorage.removeItem('blog-theme');
+				} else {
+					localStorage.setItem('blog-theme', value);
+				}
+			} catch {
+				// The current page can still change theme when storage is unavailable.
+			}
+		});
+	}
+</script>
+
+<style>
+	.theme-select {
+		display: flex;
+		flex: none;
+		gap: 0.125rem;
+		min-inline-size: 0;
+		margin: 0;
+		padding: 0.1875rem;
+		border: 1px solid var(--line);
+		border-radius: 2rem;
+		background: var(--chip);
+	}
+
+	.theme-button {
+		display: grid;
+		width: 2rem;
+		height: 2rem;
+		place-items: center;
+		border: 1px solid transparent;
+		border-radius: 50%;
+		color: var(--muted);
+		cursor: pointer;
+	}
+
+	label:hover .theme-button { color: var(--text); }
+
+	input:checked + .theme-button {
+		border-color: var(--line);
+		background: var(--surface);
+		color: var(--accent);
+	}
+
+	input:focus-visible + .theme-button {
+		outline: 2px solid var(--accent);
+		outline-offset: 1px;
+	}
+
+	.theme-icon { display: block; }
+	.light { font: 1.35rem/1 "Arial", sans-serif; }
+
+	.dark {
+		width: 0.875rem;
+		height: 0.875rem;
+		border-radius: 50%;
+		box-shadow: -0.19rem 0.17rem 0 0 currentColor;
+		transform: translate(0.11rem, -0.09rem);
+	}
+
+	.system {
+		position: relative;
+		width: 0.9375rem;
+		height: 0.6875rem;
+		margin-bottom: 0.125rem;
+		border: 1.5px solid currentColor;
+		border-radius: 0.15rem;
+	}
+
+	.system::after {
+		position: absolute;
+		inset: auto 20% -0.25rem;
+		border-bottom: 1.5px solid currentColor;
+		content: "";
+	}
+</style>

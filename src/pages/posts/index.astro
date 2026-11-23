@@ -1,113 +1,64 @@
 ---
-import { Image } from 'astro:assets';
-import { sitePath } from '../../paths';
-import { getCollection } from 'astro:content';
-import BaseHead from '../../components/BaseHead.astro';
-import Footer from '../../components/Footer.astro';
-import FormattedDate from '../../components/FormattedDate.astro';
-import Header from '../../components/Header.astro';
+import PostList from '../../components/PostList.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
+import SiteLayout from '../../layouts/SiteLayout.astro';
+import { getPosts } from '../../posts';
 
-const posts = (await getCollection('blog')).sort(
-	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+const posts = await getPosts();
+const tags = [...new Set(posts.flatMap((post) => post.data.tags))].sort((a, b) =>
+	a.localeCompare(b, 'ko'),
 );
 ---
 
-<!doctype html>
-<html lang="en">
-	<head>
-		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
-		<style>
-			main {
-				width: 960px;
+<SiteLayout title={`글 · ${SITE_TITLE}`} description={SITE_DESCRIPTION}>
+	<header class="page-heading">
+		<h1>글</h1>
+	</header>
+	<section data-post-archive aria-label="전체 글">
+		{tags.length > 0 && (
+			<div class="tag-filter" role="group" aria-label="태그 필터" hidden>
+				<button type="button" data-tag="" aria-pressed="true">전체</button>
+				{tags.map((tag) => (
+					<button type="button" data-tag={tag} aria-pressed="false">
+						<span aria-hidden="true">#</span>{tag}
+					</button>
+				))}
+			</div>
+		)}
+		<p class="visually-hidden" role="status" data-filter-status></p>
+		<PostList {posts} />
+	</section>
+</SiteLayout>
+
+<script>
+	const archive = document.querySelector('[data-post-archive]');
+	const filter = archive?.querySelector<HTMLElement>('.tag-filter');
+	const status = archive?.querySelector('[data-filter-status]');
+
+	if (archive && filter && status) {
+		const posts = Array.from(archive.querySelectorAll<HTMLElement>('[data-post-tags]'), (row) => ({
+			row,
+			tags: JSON.parse(row.dataset.postTags ?? '[]') as string[],
+		}));
+
+		const buttons = filter.querySelectorAll<HTMLButtonElement>('button[data-tag]');
+
+		function updateFilter(tag: string) {
+			for (const button of buttons) {
+				button.setAttribute('aria-pressed', String(button.dataset.tag === tag));
 			}
-			ul {
-				display: flex;
-				flex-wrap: wrap;
-				gap: 2rem;
-				list-style-type: none;
-				margin: 0;
-				padding: 0;
+			let count = 0;
+			for (const { row, tags } of posts) {
+				const visible = !tag || tags.includes(tag);
+				row.hidden = !visible;
+				if (visible) count++;
 			}
-			ul li {
-				width: calc(50% - 1rem);
-			}
-			ul li * {
-				text-decoration: none;
-				transition: 0.2s ease;
-			}
-			ul li:first-child {
-				width: 100%;
-				margin-bottom: 1rem;
-				text-align: center;
-			}
-			ul li:first-child img {
-				width: 100%;
-			}
-			ul li:first-child .title {
-				font-size: 2.369rem;
-			}
-			ul li img {
-				margin-bottom: 0.5rem;
-				border-radius: 12px;
-			}
-			ul li a {
-				display: block;
-			}
-			.title {
-				margin: 0;
-				color: rgb(var(--black));
-				line-height: 1;
-			}
-			.date {
-				margin: 0;
-				color: rgb(var(--gray));
-			}
-			ul li a:hover h4,
-			ul li a:hover .date {
-				color: rgb(var(--accent));
-			}
-			ul a:hover img {
-				box-shadow: var(--box-shadow);
-			}
-			@media (max-width: 720px) {
-				ul {
-					gap: 0.5em;
-				}
-				ul li {
-					width: 100%;
-					text-align: center;
-				}
-				ul li:first-child {
-					margin-bottom: 0;
-				}
-				ul li:first-child .title {
-					font-size: 1.563em;
-				}
-			}
-		</style>
-	</head>
-	<body>
-		<Header />
-		<main>
-			<section>
-				<ul>
-					{posts.map((post) => (
-						<li>
-							<a href={sitePath(`posts/${post.id}/`)}>
-								{post.data.heroImage && (
-									<Image width={720} height={360} src={post.data.heroImage} alt="" />
-								)}
-								<h4 class="title">{post.data.title}</h4>
-								<p class="date">
-									<FormattedDate date={post.data.pubDate} />
-								</p>
-							</a>
-						</li>
-					))}
-				</ul>
-			</section>
-		</main>
-		<Footer />
-	</body>
-</html>
+			if (status) status.textContent = `${count}개 글`;
+		}
+
+		for (const button of buttons) {
+			button.addEventListener('click', () => updateFilter(button.dataset.tag ?? ''));
+		}
+		filter.hidden = false;
+	}
+</script>

@@ -1,0 +1,31 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { sitePath } from '../paths';
+import FormattedDate from './FormattedDate.astro';
+
+interface Props {
+	posts: CollectionEntry<'blog'>[];
+	headingLevel?: 'h2' | 'h3';
+}
+
+const { posts, headingLevel: Heading = 'h2' } = Astro.props;
+---
+
+<ul class="post-list">
+	{posts.map(({ id, data }) => (
+		<li data-post-tags={JSON.stringify(data.tags)}>
+			<article class="post-row">
+				<div>
+					<Heading class="post-title"><a href={sitePath(`posts/${id}/`)}>{data.title}</a></Heading>
+					<p>{data.description}</p>
+					{data.tags.length > 0 && (
+						<ul class="tags" aria-label="태그">
+							{data.tags.map((tag) => <li><span aria-hidden="true">#</span>{tag}</li>)}
+						</ul>
+					)}
+				</div>
+				<FormattedDate date={data.pubDate} />
+			</article>
+		</li>
+	))}
+</ul>
