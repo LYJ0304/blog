@@ -5,8 +5,7 @@ import sitemap from '@astrojs/sitemap';
 import { defineConfig } from 'astro/config';
 
 export default defineConfig({
-	site: 'https://lyj0304.github.io',
-	base: '/blog',
+	site: 'https://blog.youngjoon.kr',
 	trailingSlash: 'always',
 	integrations: [mdx(), sitemap()],
 	markdown: {
