@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 620" width="560" height="620" role="img" aria-labelledby="title desc">
+  <title id="title">Grow Together의 Vanilla RAG 아키텍처</title>
+  <desc id="desc">등록 CLI는 문서를 청크로 나누고 임베딩해 pgvector에 저장한다. Worker는 질문을 같은 모델로 임베딩하고 pgvector에서 관련 청크를 조회한다. 근거가 있으면 생성 모델에 질문과 청크를 보내고, 없으면 no_context를 반환한다.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 0 8 4 0 8Z" fill="#475569"/>
+    </marker>
+  </defs>
+  <rect width="560" height="620" rx="16" fill="#f8fafc"/>
+  <g font-family="system-ui, sans-serif" text-anchor="middle" fill="#0f172a">
+    <g font-size="20" font-weight="700">
+      <text x="148" y="36">문서 등록</text>
+      <text x="412" y="36">질문 처리</text>
+    </g>
+    <g fill="#e0f2fe" stroke="#7dd3fc">
+      <rect x="24" y="54" width="248" height="50" rx="9"/>
+      <rect x="24" y="124" width="248" height="50" rx="9"/>
+      <rect x="288" y="54" width="248" height="50" rx="9"/>
+      <rect x="288" y="124" width="248" height="50" rx="9"/>
+    </g>
+    <g fill="#ede9fe" stroke="#c4b5fd">
+      <rect x="24" y="194" width="248" height="64" rx="9"/>
+      <rect x="288" y="194" width="248" height="64" rx="9"/>
+    </g>
+    <rect x="24" y="281" width="248" height="66" rx="9" fill="#dcfce7" stroke="#86efac"/>
+    <rect x="288" y="281" width="248" height="66" rx="9" fill="#e0f2fe" stroke="#7dd3fc"/>
+    <rect x="174" y="421" width="205" height="68" rx="9" fill="#ede9fe" stroke="#c4b5fd"/>
+    <rect x="174" y="514" width="205" height="74" rx="9" fill="#e0f2fe" stroke="#7dd3fc"/>
+    <rect x="394" y="421" width="142" height="68" rx="9" fill="#f1f5f9" stroke="#94a3b8"/>
+    <g fill="none" stroke="#475569" stroke-width="1.6" marker-end="url(#arrow)">
+      <path d="M148 104V124"/><path d="M148 174V194"/><path d="M148 258V281"/>
+      <path d="M412 104V124"/><path d="M412 174V194"/><path d="M412 258V281"/>
+      <path d="M272 314H288"/>
+      <path d="M412 347V380H276V421"/><path d="M412 380H465V421"/>
+      <path d="M276 489V514"/>
+    </g>
+    <g font-size="18" font-weight="600">
+      <text x="148" y="85">문서 · 등록 CLI</text>
+      <text x="148" y="155">문서를 청크로 분할</text>
+      <text x="412" y="85">질문 · 컬렉션</text>
+      <text x="412" y="155">Worker 내부 API</text>
+      <text x="148" y="220">청크 임베딩</text>
+      <text x="412" y="220">질문 임베딩</text>
+      <text x="148" y="308">PostgreSQL + pgvector</text>
+      <text x="412" y="308">코사인 유사도 검색</text>
+      <text x="276" y="448">OpenRouter의 생성 모델</text>
+      <text x="465" y="448">생성 생략</text>
+      <text x="276" y="544">출처 ID 검증</text>
+    </g>
+    <g font-size="16" fill="#334155">
+      <text x="148" y="243">text-embedding-3-small</text>
+      <text x="412" y="243">text-embedding-3-small</text>
+      <text x="148" y="331">청크 · 벡터 · 출처 저장</text>
+      <text x="412" y="331">상위 K개 · 최소 유사도 적용</text>
+      <text x="276" y="406">근거 있음</text>
+      <text x="465" y="406">근거 없음</text>
+      <text x="276" y="472">질문 + 관련 청크 전달</text>
+      <text x="465" y="472" font-family="monospace">no_context</text>
+      <text x="276" y="570">답변 · 인용 출처 반환</text>
+    </g>
+  </g>
+</svg>
